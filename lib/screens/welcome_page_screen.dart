@@ -31,19 +31,45 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-  bool _obscurePassword = true; // Переменная для управления видимостью пароля
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _isEmailInvalid = false;
+  bool _isPasswordInvalid = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _emailController.addListener(() {
+      setState(() {
+        _isEmailInvalid = _containsRussianCharacters(_emailController.text);
+      });
+    });
+
+    _passwordController.addListener(() {
+      setState(() {
+        _isPasswordInvalid = _containsRussianCharacters(_passwordController.text);
+      });
+    });
+  }
+
+  bool _containsRussianCharacters(String text) {
+    final regex = RegExp(r'[а-яА-Я]');
+    return regex.hasMatch(text);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0), // Горизонтальный отступ
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Align(
-          alignment: Alignment.topCenter, // Выравнивание по верхнему центру
+          alignment: Alignment.topCenter,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center, // Центрирование по горизонтали
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 150), // Отступ сверху
+              SizedBox(height: 150),
               Text(
                 'Start Cooking',
                 style: TextStyle(
@@ -52,7 +78,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 25), // Отступ между текстами
+              SizedBox(height: 25),
               Text(
                 'Please enter your account here',
                 style: TextStyle(
@@ -61,14 +87,12 @@ class _WelcomePageState extends State<WelcomePage> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 25), // Дополнительный отступ перед текстовыми полями
+              SizedBox(height: 25),
               Container(
-                width: double.infinity, // Ширина текстового поля на всю доступную ширину
+                width: double.infinity,
                 child: TextField(
-                  keyboardType: TextInputType.text, // Устанавливаем тип клавиатуры
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp('[a-zA-Z0-9@.]')),
-                  ],
+                  controller: _emailController,
+                  keyboardType: TextInputType.text,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.email, color: Color(0xFF9FA5C0)),
                     labelText: 'Email or phone number',
@@ -79,11 +103,17 @@ class _WelcomePageState extends State<WelcomePage> {
                       borderRadius: BorderRadius.circular(32.0),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF9FA5C0)),
+                      borderSide: BorderSide(
+                        color: _isEmailInvalid ? Colors.red : Color(0xFF4169E1),
+                        width: 2.0,
+                      ),
                       borderRadius: BorderRadius.circular(32.0),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF9FA5C0)),
+                      borderSide: BorderSide(
+                        color: _isEmailInvalid ? Colors.red : Color(0xFF9FA5C0),
+                        width: 1.0,
+                      ),
                       borderRadius: BorderRadius.circular(32.0),
                     ),
                     errorBorder: OutlineInputBorder(
@@ -97,11 +127,12 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                 ),
               ),
-              SizedBox(height: 25), // Отступ между текстовыми полями
+              SizedBox(height: 25),
               Container(
-                width: double.infinity, // Ширина текстового поля на всю доступную ширину
+                width: double.infinity,
                 child: TextField(
-                  obscureText: _obscurePassword, // Скрывать или показывать текст
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.lock, color: Color(0xFF9FA5C0)),
                     labelText: 'Password',
@@ -112,11 +143,17 @@ class _WelcomePageState extends State<WelcomePage> {
                       borderRadius: BorderRadius.circular(32.0),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF9FA5C0)),
+                      borderSide: BorderSide(
+                        color: _isPasswordInvalid ? Colors.red : Color(0xFF4169E1),
+                        width: 2.0,
+                      ),
                       borderRadius: BorderRadius.circular(32.0),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFF9FA5C0)),
+                      borderSide: BorderSide(
+                        color: _isPasswordInvalid ? Colors.red : Color(0xFF9FA5C0),
+                        width: 1.0,
+                      ),
                       borderRadius: BorderRadius.circular(32.0),
                     ),
                     errorBorder: OutlineInputBorder(
