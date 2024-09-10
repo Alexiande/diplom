@@ -14,6 +14,7 @@ class MyApp extends StatelessWidget {
       title: 'Easy Eat',
       theme: ThemeData(scaffoldBackgroundColor: const Color(0xEFF1F3)),
       home: const WelcomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

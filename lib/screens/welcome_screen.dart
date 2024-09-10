@@ -1,3 +1,4 @@
+import 'package:diplom/screens/welcome_page_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,8 +14,7 @@ class WelcomeScreen  extends StatelessWidget {
       title: 'Easy Eat',
       theme: ThemeData(scaffoldBackgroundColor: const Color(0xFFFFFFFF)),
       home: const MyHomePage(title: 'Flutter Home Page'),
-      debugShowCheckedModeBanner: false,
-    );
+         );
   }
 }
 
@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.only(top: 10),
             child: FittedBox(
-              fit: BoxFit.cover,
+              fit: BoxFit.fitWidth,
               child: Image.asset('asset/image_1.png'), // replace with your image asset
             ),
           ),
@@ -90,6 +90,9 @@ class _MyHomePageState extends State<MyHomePage> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
+                Navigator.push(context,
+                MaterialPageRoute(builder:
+                (context)=>WelcomePage()));
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(25.0),
