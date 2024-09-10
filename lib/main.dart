@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/welcome_screen.dart'; // Импортируем экран приветствия
+import 'screens/welcome_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Easy Eat',
-      theme: ThemeData(scaffoldBackgroundColor: const Color(0xEFF1F3)),
+      theme: ThemeData(scaffoldBackgroundColor: const Color(0x00eff1f3)),
       home: const WelcomeScreen(),
       debugShowCheckedModeBanner: false,
     );

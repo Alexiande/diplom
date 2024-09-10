@@ -11,7 +11,6 @@ class WelcomeScreen  extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Easy Eat',
       theme: ThemeData(scaffoldBackgroundColor: const Color(0xFFFFFFFF)),
       home: const MyHomePage(title: 'Flutter Home Page'),
          );
@@ -51,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.only(top: 10),
             child: FittedBox(
-              fit: BoxFit.fitWidth,
+              fit: BoxFit.fill,
               child: Image.asset('asset/image_1.png'), // replace with your image asset
             ),
           ),
@@ -92,10 +91,10 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(context,
                 MaterialPageRoute(builder:
-                (context)=>WelcomePage()));
+                (context)=>const WelcomePage()));
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(25.0),
+                padding:  const EdgeInsets.all(25.0),
                 backgroundColor: const Color(0xFF5E6ED8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(32.0),
