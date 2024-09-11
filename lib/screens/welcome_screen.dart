@@ -1,19 +1,20 @@
 import 'package:diplom/screens/welcome_page_screen.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
-  runApp(const WelcomeScreen ());
+  runApp(const WelcomeScreen());
 }
 
-class WelcomeScreen  extends StatelessWidget {
-  const WelcomeScreen ({super.key});
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(scaffoldBackgroundColor: const Color(0xFFFFFFFF)),
       home: const MyHomePage(title: 'Flutter Home Page'),
-         );
+    );
   }
 }
 
@@ -26,39 +27,109 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(seconds: 22),
+      vsync: this,
+    )..repeat();
+
+    _animation = Tween<double>(begin: 0.0, end: 2 * 3.14159).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 10),
-            child: Text(
-              'Easy Cook',
-              style: TextStyle(
-                fontSize: 32.0,
-                color: Color(0xFF9FA5C0),
-                fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
-                fontFamily: 'Pacifico',
+          // Сначала надпись "Easy Cook"
+          Expanded(
+            flex: 1,
+            child: Align(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Easy Cook',
+                    style: TextStyle(
+                      fontSize: 32.0,
+                      color: Color(0xFF9FA5C0),
+                      fontWeight: FontWeight.bold,
+                      fontStyle: FontStyle.italic,
+                      fontFamily: 'Pacifico',
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: FittedBox(
-              fit: BoxFit.fill,
-              child: Image.asset('asset/image_1.png'), // replace with your image asset
+          // Затем анимации с изображениями
+          Expanded(
+            flex: 3,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Главная картинка
+                RotationTransition(
+                  turns: _animation,
+                  child: SizedBox(
+                    width: screenSize.width * 0.4,
+                    height: screenSize.width * 0.4,
+                    child: Image.asset('asset/image_1.png', fit: BoxFit.cover), // замените на свой актив
+                  ),
+                ),
+                // Вращающиеся картинки
+                Align(
+                  alignment: Alignment.bottomLeft,
+                    child: SizedBox(
+                      child: Image.asset('asset/image_2.png', fit: BoxFit.cover), // замените на свой актив
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                    child: SizedBox(
+                      child: Image.asset('asset/image_3.png', fit: BoxFit.cover), // замените на свой актив
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.topLeft,
+                    child: SizedBox(
+                      child: Image.asset('asset/image_4.png', fit: BoxFit.cover), // замените на свой актив
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.topRight,
+                    child: SizedBox(
+                      child: Image.asset('asset/image_5.png', fit: BoxFit.cover), // замените на свой актив
+                    ),
+                  ),
+              ],
             ),
           ),
-          const Center(
+          // Внизу кнопка и дополнительный текст
+          Expanded(
+            flex: 2,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: 10),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
                   child: Text(
                     'Start Cooking',
                     style: TextStyle(
@@ -68,11 +139,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-
-                Padding(
-                  padding: EdgeInsets.only(top: 10),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
                   child: Text(
                     'Let’s join our community\n    to cook better food!',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17.0,
                       color: Color(0xFF9FA5C0),
@@ -80,34 +151,35 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 50.0),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 15.0),
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const WelcomePage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.all(25.0),
+                      backgroundColor: const Color(0xFF5E6ED8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32.0),
+                      ),
+                    ),
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(
+                        color: Color(0xFFEFF1F3),
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
               ],
-            ),
-          ),
-          const SizedBox(height: 50.0),
-          Container(
-            margin: const EdgeInsets.only(bottom: 40.0, left: 15.0, right: 15.0),
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(context,
-                MaterialPageRoute(builder:
-                (context)=>const WelcomePage()));
-              },
-              style: ElevatedButton.styleFrom(
-                padding:  const EdgeInsets.all(25.0),
-                backgroundColor: const Color(0xFF5E6ED8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(32.0),
-                ),
-              ),
-              child: const Text(
-                'Get Started',
-                style: TextStyle(
-                  color: Color(0xFFEFF1F3),
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
             ),
           ),
         ],

@@ -21,4 +21,8 @@ flutter:
   uses-material-design: true
   assets:
     - asset/image_1.png
+    - asset/image_2.png
+    - asset/image_3.png
+    - asset/image_4.png
+    - asset/image_5.png
 
