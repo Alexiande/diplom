@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
-  runApp(const WelcomePageScreen ());
+  runApp(const WelcomePageScreen());
 }
 
-class WelcomePageScreen  extends StatelessWidget {
-  const WelcomePageScreen ({super.key});
+class WelcomePageScreen extends StatelessWidget {
+  const WelcomePageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: const WelcomePageScreen(),
-      );
-    }
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: const WelcomePage(),
+    );
   }
-
-
+}
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -69,17 +66,17 @@ class _WelcomePageState extends State<WelcomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 150),
-              Text(
-                'Start Cooking',
+              const SizedBox(height: 150),
+              const Text(
+                'Welcome Back!',
                 style: TextStyle(
                   fontSize: 22.0,
                   color: Color(0xFF2E3E5C),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 25),
-              Text(
+              const SizedBox(height: 25),
+              const Text(
                 'Please enter your account here',
                 style: TextStyle(
                   fontSize: 17.0,
@@ -87,7 +84,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
               Container(
                 width: double.infinity,
                 child: TextField(
@@ -124,12 +121,14 @@ class _WelcomePageState extends State<WelcomePage> {
                       borderSide: BorderSide(color: Colors.red),
                       borderRadius: BorderRadius.circular(32.0),
                     ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16.0), // Adjust padding to fit height
                   ),
                 ),
               ),
               SizedBox(height: 25),
               Container(
                 width: double.infinity,
+                height: 56,
                 child: TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -164,6 +163,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       borderSide: BorderSide(color: Colors.red),
                       borderRadius: BorderRadius.circular(32.0),
                     ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16.0), // Adjust padding to fit height
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -174,6 +174,26 @@ class _WelcomePageState extends State<WelcomePage> {
                           _obscurePassword = !_obscurePassword;
                         });
                       },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 5.0),
+                  child: TextButton(
+                    onPressed: () {
+                      // Handle forgot password action here
+                    },
+                    child: const Text(
+                      'Forgot password?',
+                      style: TextStyle(
+                        color: Color(0xFF2E3E5C),
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),

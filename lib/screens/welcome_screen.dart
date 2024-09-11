@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     super.initState();
 
     _controller = AnimationController(
-      duration: const Duration(seconds: 22),
+      duration: const Duration(seconds: 25),
       vsync: this,
     )..repeat();
 
@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       fontFamily: 'Pacifico',
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
@@ -89,36 +89,35 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                 RotationTransition(
                   turns: _animation,
                   child: SizedBox(
-                    width: screenSize.width * 0.4,
-                    height: screenSize.width * 0.4,
                     child: Image.asset('asset/image_1.png', fit: BoxFit.cover), // замените на свой актив
                   ),
                 ),
                 // Вращающиеся картинки
-                Align(
-                  alignment: Alignment.bottomLeft,
-                    child: SizedBox(
-                      child: Image.asset('asset/image_2.png', fit: BoxFit.cover), // замените на свой актив
-                    ),
+                Positioned(
+                  left: 15.0,
+                  top: 10,
+                  child: SizedBox(
+                    child: Image.asset('asset/image_5.png', fit: BoxFit.cover), // замените на свой актив
                   ),
+                ),
                 Align(
                   alignment: Alignment.bottomRight,
-                    child: SizedBox(
-                      child: Image.asset('asset/image_3.png', fit: BoxFit.cover), // замените на свой актив
-                    ),
+                  child: SizedBox(
+                    child: Image.asset('asset/image_5.png', fit: BoxFit.cover), // замените на свой актив
                   ),
+                ),
                 Align(
-                  alignment: Alignment.topLeft,
-                    child: SizedBox(
-                      child: Image.asset('asset/image_4.png', fit: BoxFit.cover), // замените на свой актив
-                    ),
+                  alignment: Alignment.bottomLeft,
+                  child: SizedBox(
+                    child: Image.asset('asset/image_4.png', fit: BoxFit.cover), // замените на свой актив
                   ),
+                ),
                 Align(
                   alignment: Alignment.topRight,
-                    child: SizedBox(
-                      child: Image.asset('asset/image_5.png', fit: BoxFit.cover), // замените на свой актив
-                    ),
+                  child: SizedBox(
+                    child: Image.asset('asset/image_3.png', fit: BoxFit.cover), // замените на свой актив
                   ),
+                ),
               ],
             ),
           ),
@@ -152,29 +151,32 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                   ),
                 ),
                 const SizedBox(height: 50.0),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 15.0),
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const WelcomePage()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(25.0),
-                      backgroundColor: const Color(0xFF5E6ED8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32.0),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0), // Добавление отступа снизу
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 15.0),
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const WelcomePage()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(25.0),
+                        backgroundColor: const Color(0xFF5E6ED8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32.0),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'Get Started',
-                      style: TextStyle(
-                        color: Color(0xFFEFF1F3),
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.bold,
+                      child: const Text(
+                        'Get Started',
+                        style: TextStyle(
+                          color: Color(0xFFEFF1F3),
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
