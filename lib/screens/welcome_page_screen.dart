@@ -207,7 +207,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SearchPage()),
+                        MaterialPageRoute(builder: (context) =>  SearchPage()),
                       );
                     },
                     style: ElevatedButton.styleFrom(
