@@ -1,12 +1,15 @@
+import 'package:diplom/firebase_auth.dart';
 import 'package:diplom/screens/SearchPageScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 void main() {
   runApp(const WelcomePageScreen());
 }
 
 class WelcomePageScreen extends StatelessWidget {
-  const WelcomePageScreen({Key? key}) : super(key: key);
+  const WelcomePageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class WelcomePageScreen extends StatelessWidget {
 }
 
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({Key? key}) : super(key: key);
+  const WelcomePage({super.key});
 
   @override
   _WelcomePageState createState() => _WelcomePageState();
@@ -31,6 +34,9 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  final AuthService _authService = AuthService();
+
   bool _obscurePassword = true;
   bool _isEmailInvalid = false;
   bool _isPasswordInvalid = false;
@@ -41,13 +47,13 @@ class _WelcomePageState extends State<WelcomePage> {
 
     _emailController.addListener(() {
       setState(() {
-        _isEmailInvalid = _containsRussianCharacters(_emailController.text);
+        _isEmailInvalid = _containsRussianCharacters(_emailController.text) || !_isEmailValid(_emailController.text);
       });
     });
 
     _passwordController.addListener(() {
       setState(() {
-        _isPasswordInvalid = _containsRussianCharacters(_passwordController.text);
+        _isPasswordInvalid = _containsRussianCharacters(_passwordController.text) || !_isPasswordValid(_passwordController.text);
       });
     });
   }
@@ -55,6 +61,15 @@ class _WelcomePageState extends State<WelcomePage> {
   bool _containsRussianCharacters(String text) {
     final regex = RegExp(r'[а-яА-Я]');
     return regex.hasMatch(text);
+  }
+
+  bool _isEmailValid(String email) {
+    final regex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return regex.hasMatch(email);
+  }
+
+  bool _isPasswordValid(String password) {
+    return password.length >= 6; // Проверка на минимальную длину пароля
   }
 
   @override
@@ -85,6 +100,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ),
             const SizedBox(height: 25),
+            // Email TextField
             SizedBox(
               width: double.infinity,
               child: TextField(
@@ -126,7 +142,8 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ),
             const SizedBox(height: 25),
-            Container(
+            // Password TextField
+            SizedBox(
               width: double.infinity,
               height: 56,
               child: TextField(
@@ -205,10 +222,13 @@ class _WelcomePageState extends State<WelcomePage> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) =>  SearchPage()),
-                      );
+                      if (_isEmailInvalid || _isPasswordInvalid) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Please correct the errors above')),
+                        );
+                      } else {
+                        _login(); // Вызываем метод входа
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5E6ED8),
@@ -286,14 +306,14 @@ class _WelcomePageState extends State<WelcomePage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to sign up page
+                GestureDetector(
+                  onTap: () {
+                    _register();
                   },
                   child: const Text(
-                    'Sign Up',
+                    'Sign up',
                     style: TextStyle(
-                      color: Color(0xFF4169E1),
+                      color: Color(0xFF5E6ED8),
                       fontSize: 16.0,
                       fontWeight: FontWeight.bold,
                     ),
@@ -301,9 +321,37 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ],
             ),
+            const SizedBox(height: 25),
           ],
         ),
       ),
     );
+  }
+  void _register() async {
+    User? user = await _authService.registerWithEmailAndPassword(
+        _emailController.text, _passwordController.text);
+    if (user != null) {
+      // Успешная регистрация
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => SearchPage()));
+    } else {
+      // Ошибка
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration failed')));
+    }
+  }
+
+  void _login() async {
+    User? user = await _authService.signInWithEmailAndPassword(
+        _emailController.text, _passwordController.text);
+    if (user != null) {
+      // Успешный вход
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => SearchPage()));
+    } else {
+      // Ошибка
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed')));
+    }
   }
 }

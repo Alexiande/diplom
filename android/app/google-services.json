@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "76889669653",
+    "project_id": "easy-eat-6a9d2",
+    "storage_bucket": "easy-eat-6a9d2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:76889669653:android:9768f99b9f24ed14fcce1c",
+        "android_client_info": {
+          "package_name": "com.example.diplom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmMHVkDZzBJ3Ljq6dw4WKqDaFNb_3l3ls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

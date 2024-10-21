@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/welcome_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 
-void main() {
+Future<void> main() async {
   // Set the status bar style globally
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Make the status bar transparent
     statusBarIconBrightness: Brightness.light, // Set icons to light
     statusBarBrightness: Brightness.light, // Set status bar background to light
   ));
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
   runApp(MyApp());
 }

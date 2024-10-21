@@ -11,25 +11,25 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   ApiService apiService = ApiService();
-  late Future<List<dynamic>> items;
+  late Future<List<dynamic>> items; // Объявляем переменную items
 
-  int _selectedIndex = 0; // To store the current index
-  String selectedCategory = 'All'; // Selected category
+  int _selectedIndex = 0; // Чтобы хранить текущий индекс
+  String selectedCategory = 'All'; // Выбранная категория
 
   @override
   void initState() {
     super.initState();
-    items = apiService.fetchItems(); // Load data on initialization
+    items = apiService.fetchItems(); // Загружаем данные при инициализации
   }
 
-  // Method to handle navigation item taps
+  // Метод для обработки нажатий на элементы навигации
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  // Method to filter items by category
+  // Метод для фильтрации элементов по категории
   Future<List<dynamic>> _filterItems() async {
     final allItems = await items;
     if (selectedCategory == 'All') {
@@ -262,60 +262,43 @@ class RecipeCard extends StatelessWidget {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: const Offset(0, 3), // Смещение тени
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                height: 120, // Высота изображения
-                width: double.infinity,
-                placeholder: (context, url) => Container(
-                  height: 120,
-                  width: double.infinity,
-                  child: const Center(
-                    child: CircularProgressIndicator(), // Индикатор загрузки
-                  ),
+            CachedNetworkImage(
+              imageUrl: imageUrl,
+              imageBuilder: (context, imageProvider) => Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0), // Отступ вокруг текста
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E3E5C),
-                    ),
-                    overflow: TextOverflow.ellipsis, // Обрезка текста
-                    maxLines: 1, // Ограничение текста в одну строку
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    time,
-                    style: const TextStyle(
-                      fontSize: 14, // Размер шрифта для времени
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 8.0), // Отступ слева и справа
+              child: Text(
+                time,
+                style: const TextStyle(color: Colors.grey),
               ),
             ),
           ],
@@ -324,5 +307,3 @@ class RecipeCard extends StatelessWidget {
     );
   }
 }
-
-
