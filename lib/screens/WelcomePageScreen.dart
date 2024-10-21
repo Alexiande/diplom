@@ -1,5 +1,6 @@
-import 'package:diplom/firebase_auth.dart';
+import 'package:diplom/FirebaseAuth.dart';
 import 'package:diplom/screens/SearchPageScreen.dart';
+import 'package:diplom/screens/SignUpScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -308,7 +309,11 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    _register();
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignUpScreen()), // Переход на экран регистрации
+                    );
                   },
                   child: const Text(
                     'Sign up',
@@ -326,19 +331,6 @@ class _WelcomePageState extends State<WelcomePage> {
         ),
       ),
     );
-  }
-  void _register() async {
-    User? user = await _authService.registerWithEmailAndPassword(
-        _emailController.text, _passwordController.text);
-    if (user != null) {
-      // Успешная регистрация
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => SearchPage()));
-    } else {
-      // Ошибка
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration failed')));
-    }
   }
 
   void _login() async {

@@ -33,6 +33,21 @@ class ApiService {
     }
   }
 
+  // Метод для получения рецептов по категории и тегу
+  Future<List<dynamic>> fetchItemsByCategoryAndTag({String? category, String? tag}) async {
+    final String categoryFilter = category != null ? '&type=$category' : '';
+    final String tagFilter = tag != null ? '&tags=$tag' : ''; // Обновляем параметр на "tags"
+    final response = await http.get(
+      Uri.parse('$apiUrl/complexSearch?apiKey=$apiKey$categoryFilter$tagFilter&number=10'),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return jsonResponse['results']; // Возвращаем список рецептов
+    } else {
+      throw Exception('Failed to load items');
+    }
+  }
 
   // Метод для получения истории поиска
   Future<List<dynamic>> fetchSearchHistory() async {

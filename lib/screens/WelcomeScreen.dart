@@ -1,6 +1,5 @@
-import 'package:diplom/screens/welcome_page_screen.dart';
+import 'package:diplom/screens/WelcomePageScreen.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 
 void main() {
   runApp(const WelcomeScreen());

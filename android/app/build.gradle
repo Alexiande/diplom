@@ -34,7 +34,7 @@ android {
     defaultConfig {
         // Укажите уникальный Application ID.
         applicationId = "com.example.diplom"
-        minSdk = flutter.minSdkVersion
+        minSdkVersion 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:diplom/services/api_service.dart';
+import 'package:diplom/services/ApiService.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:diplom/services/LikeService.dart';
+import 'dart:ui';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -29,14 +31,21 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  // Method to filter items by category
   Future<List<dynamic>> _filterItems() async {
-    final allItems = await items;
-    if (selectedCategory == 'All') {
-      return allItems;
-    } else {
-      return allItems.where((item) => item['category'] == selectedCategory).toList();
+    // Подготовим список тегов для фильтрации
+    List<String> tags = [];
+    if (selectedCategory != 'All') {
+      tags.add(selectedCategory.toLowerCase()); // Преобразуем в нижний регистр
     }
+    tags.add('diet'); // Добавляем общий тег "diet"
+
+    // Преобразуем список тегов в строку с разделителем запятой
+    String tagString = tags.join(',');
+
+    return await apiService.fetchItemsByCategoryAndTag(
+      category: selectedCategory == 'All' ? null : selectedCategory,
+      tag: tagString, // Передаем строку тегов
+    );
   }
 
   Color _getButtonColor(String category) {
@@ -54,7 +63,6 @@ class _SearchPageState extends State<SearchPage> {
         preferredSize: const Size.fromHeight(100.0), // Увеличиваем высоту AppBar
         child: Container(
           padding: const EdgeInsets.only(top: 40), // Добавляем отступ сверху
-          color: Colors.white, // Белый фон для AppBar
           child: AppBar(
             backgroundColor: Colors.white, // Делаем AppBar белым
             elevation: 0,
@@ -93,13 +101,13 @@ class _SearchPageState extends State<SearchPage> {
         children: [
           const SizedBox(height: 16), // Отступ сверху для разделения AppBar и контента
 
-          // Заголовок "Categories"
-          Padding(
-            padding: const EdgeInsets.only(left: 15.0), // Отступ влево для заголовка
-            child: const Align(
+          // Заголовок "Category"
+          const Padding(
+            padding: EdgeInsets.only(left: 15.0), // Отступ влево для заголовка
+            child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Categories',
+                'Category',
                 style: TextStyle(
                   fontSize: 22.0,
                   color: Color(0xFF2E3E5C),
@@ -145,6 +153,7 @@ class _SearchPageState extends State<SearchPage> {
                   onPressed: () {
                     setState(() {
                       selectedCategory = 'Food';
+                      items = _filterItems(); // Перезагрузка данных при смене категории
                     });
                   },
                   child: Text(
@@ -162,7 +171,8 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                   onPressed: () {
                     setState(() {
-                      selectedCategory = 'Drinks';
+                      selectedCategory = 'Drinks'; // Или другая категория
+                      items = _filterItems(); // Перезагрузка данных при смене категории
                     });
                   },
                   child: Text(
@@ -194,12 +204,16 @@ class _SearchPageState extends State<SearchPage> {
                     padding: const EdgeInsets.all(16.0),
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
-                      final item = snapshot.data![index];
-                      return RecipeCard(
-                        title: item['title'],
-                        imageUrl: item['image'],
-                        time: '>60 min', // Вы можете добавить время в JSON
-                      );
+                    final item = snapshot.data![index];
+                    LikeService likeService = LikeService();
+                    return RecipeCard(
+                      title: item['title'],
+                      imageUrl: item['image'],
+                      time: '>60 min', // Время можно получить из данных, если доступно
+                      category: selectedCategory, // Передаем категорию
+                      itemId: item['id'].toString(),
+                      likeService: likeService,
+                    );
                     },
                   );
                 }
@@ -240,17 +254,55 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-class RecipeCard extends StatelessWidget {
+
+class RecipeCard extends StatefulWidget {
   final String title;
   final String imageUrl;
   final String time;
+  final String category; // Добавляем категорию
+  final String itemId; // Уникальный идентификатор для рецепта
+  final LikeService likeService;
 
   const RecipeCard({
     Key? key,
     required this.title,
     required this.imageUrl,
     required this.time,
+    required this.category, // Инициализация категории
+    required this.itemId,
+    required this.likeService,
   }) : super(key: key);
+
+  @override
+  _RecipeCardState createState() => _RecipeCardState();
+}
+
+class _RecipeCardState extends State<RecipeCard> {
+  bool isLiked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLikeStatus();
+  }
+
+  Future<void> _loadLikeStatus() async {
+    final likedItems = await widget.likeService.getLikedItems();
+    setState(() {
+      isLiked = likedItems.contains(widget.itemId);
+    });
+  }
+
+  Future<void> _toggleLike() async {
+    setState(() {
+      isLiked = !isLiked;
+    });
+    if (isLiked) {
+      await widget.likeService.addLikedItem(widget.itemId);
+    } else {
+      await widget.likeService.removeLikedItem(widget.itemId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -269,53 +321,78 @@ class RecipeCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                height: 120, // Высота изображения
-                width: double.infinity,
-                placeholder: (context, url) => Container(
-                  height: 120,
-                  width: double.infinity,
-                  child: const Center(
-                    child: CircularProgressIndicator(), // Индикатор загрузки
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16), // Скругляем все углы
+                  child: CachedNetworkImage(
+                    imageUrl: widget.imageUrl,
+                    fit: BoxFit.cover,
+                    height: 120, // Высота изображения
+                    width: double.infinity,
+                    placeholder: (context, url) => Container(
+                      height: 120,
+                      width: double.infinity,
+                      child: const Center(
+                        child: CircularProgressIndicator(), // Индикатор загрузки
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
                   ),
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: const TextStyle(
+                          fontSize: 18, // Увеличиваем размер шрифта
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2E3E5C),
+                        ),
+                        overflow: TextOverflow.ellipsis, // Обрезка текста
+                        maxLines: 1, // Ограничение текста в одну строку
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${widget.time} • ${widget.category}', // Отображаем время и категорию
+                        style: const TextStyle(
+                          fontSize: 14, // Размер шрифта для времени
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E3E5C),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12), // Скругленные углы для кнопки
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Эффект размытия
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.white.withOpacity(0.2), // Полупрозрачный цвет
                     ),
-                    overflow: TextOverflow.ellipsis, // Обрезка текста
-                    maxLines: 1, // Ограничение текста в одну строку
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    time,
-                    style: const TextStyle(
-                      fontSize: 14, // Размер шрифта для времени
-                      color: Colors.grey,
+                    padding: const EdgeInsets.all(4), // Отступы вокруг иконки
+                    child: IconButton(
+                      icon: Icon(
+                        isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: isLiked ? Colors.red : Colors.white,
+                      ),
+                      onPressed: _toggleLike,
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -324,5 +401,3 @@ class RecipeCard extends StatelessWidget {
     );
   }
 }
-
-

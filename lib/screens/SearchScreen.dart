@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:diplom/services/api_service.dart';
+import 'package:diplom/services/ApiService.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class SearchPage extends StatefulWidget {
