@@ -3,6 +3,8 @@ import 'package:diplom/services/ApiService.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:diplom/services/LikeService.dart';
 import 'dart:ui';
+import 'package:diplom/screens/UploadStepScreen.dart';
+
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -28,6 +30,12 @@ class _SearchPageState extends State<SearchPage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if (index == 1) { // Проверяем, если выбрана кнопка загрузки
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => UploadStepScreen()), // Переход на экран UploadStepScreen
+        );
+      }
     });
   }
 
@@ -204,16 +212,16 @@ class _SearchPageState extends State<SearchPage> {
                     padding: const EdgeInsets.all(16.0),
                     itemCount: snapshot.data!.length,
                     itemBuilder: (context, index) {
-                    final item = snapshot.data![index];
-                    LikeService likeService = LikeService();
-                    return RecipeCard(
-                      title: item['title'],
-                      imageUrl: item['image'],
-                      time: '>60 min', // Время можно получить из данных, если доступно
-                      category: selectedCategory, // Передаем категорию
-                      itemId: item['id'].toString(),
-                      likeService: likeService,
-                    );
+                      final item = snapshot.data![index];
+                      LikeService likeService = LikeService();
+                      return RecipeCard(
+                        title: item['title'],
+                        imageUrl: item['image'],
+                        time: '>60 min', // Время можно получить из данных, если доступно
+                        category: selectedCategory, // Передаем категорию
+                        itemId: item['id'].toString(),
+                        likeService: likeService,
+                      );
                     },
                   );
                 }
@@ -253,6 +261,8 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 }
+
+
 
 
 class RecipeCard extends StatefulWidget {

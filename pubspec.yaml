@@ -17,7 +17,8 @@ dev_dependencies:
     sdk: flutter
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
-  shared_preferences: ^2.1.0 # Последняя стабильная версия
+  shared_preferences: ^2.1.0
+  image_picker: ^0.8.6
 
   flutter_lints: ^4.0.0
 
