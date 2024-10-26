@@ -1,4 +1,4 @@
-import 'package:diplom/screens/UploadStepScreen.dart';
+import 'package:diplom/screens/LoginScreen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => UploadStepScreen()),
+                            MaterialPageRoute(builder: (context) => const WelcomePage()),
                           );
                         },
                         style: ElevatedButton.styleFrom(

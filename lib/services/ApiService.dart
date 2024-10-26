@@ -27,6 +27,12 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
+      // Добавляем получение времени приготовления для каждого рецепта
+      for (var item in jsonResponse['results']) {
+        // Получаем детали рецепта для каждого элемента
+        final recipeDetails = await fetchRecipeDetails(item['id']);
+        item['readyInMinutes'] = recipeDetails['preparationTime'];
+      }
       return jsonResponse['results']; // Возвращаем список рецептов
     } else {
       throw Exception('Failed to load items');
@@ -36,7 +42,7 @@ class ApiService {
   // Метод для получения рецептов по категории и тегу
   Future<List<dynamic>> fetchItemsByCategoryAndTag({String? category, String? tag}) async {
     final String categoryFilter = category != null ? '&type=$category' : '';
-    final String tagFilter = tag != null ? '&tags=$tag' : ''; // Обновляем параметр на "tags"
+    final String tagFilter = tag != null ? '&tags=$tag' : '';
     final response = await http.get(
       Uri.parse('$apiUrl/complexSearch?apiKey=$apiKey$categoryFilter$tagFilter&number=10'),
     );
@@ -49,10 +55,31 @@ class ApiService {
     }
   }
 
-  // Метод для получения истории поиска
-  Future<List<dynamic>> fetchSearchHistory() async {
-    // Пример запроса на получение истории (можно реализовать с использованием локального хранилища)
-    return Future.delayed(Duration(seconds: 1), () => ['Pancakes', 'Salad', 'Sushi']);
+
+  // Метод для получения информации о рецепте по его идентификатору
+  Future<Map<String, dynamic>> fetchRecipeDetails(int recipeId) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/$recipeId/information?apiKey=$apiKey'),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return {
+        'image': jsonResponse['image'],
+        'title': jsonResponse['title'],
+        'author': jsonResponse['creditsText'], // Имя автора
+        'authorAvatar': jsonResponse['image'], // Картинка автора (можно заменить на аватар)
+        'preparationTime': jsonResponse['readyInMinutes'].toString() + ' min', // Время приготовления
+        'likes': jsonResponse['aggregateLikes'], // Количество лайков
+        'description': jsonResponse['summary'], // Описание
+        'ingredients': jsonResponse['extendedIngredients']
+            .map((ingredient) => ingredient['original'])
+            .toList(), // Список ингредиентов
+      };
+    } else {
+      throw Exception('Failed to load recipe details');
+    }
   }
 }
+
 

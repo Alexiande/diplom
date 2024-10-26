@@ -6,11 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 
 void main() {
-  runApp(const WelcomePageScreen());
+  runApp(const LoginScreen());
 }
 
-class WelcomePageScreen extends StatelessWidget {
-  const WelcomePageScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

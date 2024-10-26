@@ -1,3 +1,4 @@
+import 'package:diplom/screens/RecipeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:diplom/services/ApiService.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -217,7 +218,7 @@ class _SearchPageState extends State<SearchPage> {
                       return RecipeCard(
                         title: item['title'],
                         imageUrl: item['image'],
-                        time: '>60 min', // Время можно получить из данных, если доступно
+                        time: '${item['readyInMinutes']} min', // Время можно получить из данных, если доступно
                         category: selectedCategory, // Передаем категорию
                         itemId: item['id'].toString(),
                         likeService: likeService,
@@ -318,94 +319,103 @@ class _RecipeCardState extends State<RecipeCard> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0), // Отступ вокруг карточки
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: const Offset(0, 3), // Смещение тени
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16), // Скругляем все углы
-                  child: CachedNetworkImage(
-                    imageUrl: widget.imageUrl,
-                    fit: BoxFit.cover,
-                    height: 120, // Высота изображения
-                    width: double.infinity,
-                    placeholder: (context, url) => Container(
-                      height: 120,
+      child: GestureDetector( // Используем GestureDetector для обработки нажатий
+        onTap: () {
+          // Здесь вы можете определить логику перехода на новый экран
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RecipeScreen(recipeId: int.parse(widget.itemId)),), // Преобразуем itemId в int
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: const Offset(0, 3), // Смещение тени
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16), // Скругляем все углы
+                    child: CachedNetworkImage(
+                      imageUrl: widget.imageUrl,
+                      fit: BoxFit.cover,
+                      height: 120, // Высота изображения
                       width: double.infinity,
-                      child: const Center(
-                        child: CircularProgressIndicator(), // Индикатор загрузки
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: const TextStyle(
-                          fontSize: 18, // Увеличиваем размер шрифта
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E3E5C),
-                        ),
-                        overflow: TextOverflow.ellipsis, // Обрезка текста
-                        maxLines: 1, // Ограничение текста в одну строку
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${widget.time} • ${widget.category}', // Отображаем время и категорию
-                        style: const TextStyle(
-                          fontSize: 14, // Размер шрифта для времени
-                          color: Colors.grey,
+                      placeholder: (context, url) => Container(
+                        height: 120,
+                        width: double.infinity,
+                        child: const Center(
+                          child: CircularProgressIndicator(), // Индикатор загрузки
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12), // Скругленные углы для кнопки
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Эффект размытия
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.white.withOpacity(0.2), // Полупрозрачный цвет
+                      errorWidget: (context, url, error) => const Icon(Icons.error),
                     ),
-                    padding: const EdgeInsets.all(4), // Отступы вокруг иконки
-                    child: IconButton(
-                      icon: Icon(
-                        isLiked ? Icons.favorite : Icons.favorite_border,
-                        color: isLiked ? Colors.red : Colors.white,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: const TextStyle(
+                            fontSize: 18, // Увеличиваем размер шрифта
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E3E5C),
+                          ),
+                          overflow: TextOverflow.ellipsis, // Обрезка текста
+                          maxLines: 1, // Ограничение текста в одну строку
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${widget.time} • ${widget.category}', // Отображаем время и категорию
+                          style: const TextStyle(
+                            fontSize: 14, // Размер шрифта для времени
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12), // Скругленные углы для кнопки
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Эффект размытия
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white.withOpacity(0.2), // Полупрозрачный цвет
                       ),
-                      onPressed: _toggleLike,
+                      padding: const EdgeInsets.all(4), // Отступы вокруг иконки
+                      child: IconButton(
+                        icon: Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          color: isLiked ? Colors.red : Colors.white,
+                        ),
+                        onPressed: _toggleLike,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,27 +1,30 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LikeService {
-  static const String likedItemsKey = 'likedItems';
+  static const String _likedItemsKey = 'likedItems';
 
-  // Метод для получения списка лайкнутых элементов
+  // Получение списка лайкнутых элементов
   Future<Set<String>> getLikedItems() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList(likedItemsKey)?.toSet() ?? {};
+    return prefs.getStringList(_likedItemsKey)?.toSet() ?? <String>{};
   }
 
-  // Метод для добавления элемента в список лайкнутых
+  // Добавление элемента в список лайкнутых
   Future<void> addLikedItem(String itemId) async {
     final prefs = await SharedPreferences.getInstance();
     final likedItems = await getLikedItems();
-    likedItems.add(itemId);
-    prefs.setStringList(likedItemsKey, likedItems.toList());
+    if (likedItems.add(itemId)) { // добавляем только если itemId еще нет
+      await prefs.setStringList(_likedItemsKey, likedItems.toList());
+    }
   }
 
-  // Метод для удаления элемента из списка лайкнутых
+  // Удаление элемента из списка лайкнутых
   Future<void> removeLikedItem(String itemId) async {
     final prefs = await SharedPreferences.getInstance();
     final likedItems = await getLikedItems();
-    likedItems.remove(itemId);
-    prefs.setStringList(likedItemsKey, likedItems.toList());
+    if (likedItems.remove(itemId)) { // удаляем только если itemId был в списке
+      await prefs.setStringList(_likedItemsKey, likedItems.toList());
+    }
   }
 }
+
