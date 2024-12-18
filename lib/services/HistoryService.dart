@@ -1,17 +1,25 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryService {
-  static Future<void> saveSearchQuery(String query) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? history = prefs.getStringList('search_history') ?? [];
+  // Сохранение нового поискового запроса
+  Future<void> saveSearchHistory(String query) async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> history = prefs.getStringList('searchHistory') ?? [];
     if (!history.contains(query)) {
       history.add(query);
-      await prefs.setStringList('search_history', history);
     }
+    await prefs.setStringList('searchHistory', history);
   }
 
-  static Future<List<String>> getSearchHistory() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getStringList('search_history') ?? [];
+  // Получение истории поиска
+  Future<List<String>> getSearchHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('searchHistory') ?? [];
+  }
+
+  // Очистка истории поиска
+  Future<void> clearSearchHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('searchHistory');
   }
 }

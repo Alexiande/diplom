@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       ),
                     ),
                   ),
-                  const SizedBox(height: 50.0),
+                  const SizedBox(height: 30.0),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     child: SizedBox(

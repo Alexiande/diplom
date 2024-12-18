@@ -19,6 +19,20 @@ class ApiService {
     }
   }
 
+  // Метод для получения списка рецептов по ингредиенту
+  Future<List<dynamic>> fetchRecipesByIngredients(String ingredients) async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/complexSearch?apiKey=$apiKey&ingredients=$ingredients&number=10'),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return jsonResponse['results']; // Возвращаем список рецептов
+    } else {
+      throw Exception('Failed to load recipes');
+    }
+  }
+
   // Метод для получения списка рецептов по умолчанию
   Future<List<dynamic>> fetchItems() async {
     final response = await http.get(
@@ -55,7 +69,6 @@ class ApiService {
     }
   }
 
-
   // Метод для получения информации о рецепте по его идентификатору
   Future<Map<String, dynamic>> fetchRecipeDetails(int recipeId) async {
     final response = await http.get(
@@ -81,5 +94,4 @@ class ApiService {
     }
   }
 }
-
 

@@ -5,16 +5,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:diplom/services/LikeService.dart';
 import 'dart:ui';
 import 'package:diplom/screens/UploadStepScreen.dart';
+import 'package:diplom/screens/ProfileScreen.dart';
 
+class HomePage extends StatefulWidget {
+  final String userId;
 
-class SearchPage extends StatefulWidget {
-  const SearchPage({Key? key}) : super(key: key);
+  const HomePage({Key? key, required this.userId}) : super(key: key);
 
   @override
-  _SearchPageState createState() => _SearchPageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _HomePageState extends State<HomePage> {
   ApiService apiService = ApiService();
   late Future<List<dynamic>> items;
 
@@ -35,6 +37,13 @@ class _SearchPageState extends State<SearchPage> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => UploadStepScreen()), // Переход на экран UploadStepScreen
+        );
+      }
+      if (index == 4){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileScreen(userEmail: 'userEmail')),
+
         );
       }
     });
@@ -370,19 +379,19 @@ class _RecipeCardState extends State<RecipeCard> {
                         Text(
                           widget.title,
                           style: const TextStyle(
-                            fontSize: 18, // Увеличиваем размер шрифта
+                            fontSize: 16.0,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF2E3E5C),
                           ),
-                          overflow: TextOverflow.ellipsis, // Обрезка текста
-                          maxLines: 1, // Ограничение текста в одну строку
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${widget.time} • ${widget.category}', // Отображаем время и категорию
+                          widget.time,
                           style: const TextStyle(
-                            fontSize: 14, // Размер шрифта для времени
-                            color: Colors.grey,
+                            fontSize: 14.0,
+                            color: Color(0xFF9FA5C0),
                           ),
                         ),
                       ],
@@ -393,25 +402,12 @@ class _RecipeCardState extends State<RecipeCard> {
               Positioned(
                 top: 8,
                 right: 8,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12), // Скругленные углы для кнопки
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Эффект размытия
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.white.withOpacity(0.2), // Полупрозрачный цвет
-                      ),
-                      padding: const EdgeInsets.all(4), // Отступы вокруг иконки
-                      child: IconButton(
-                        icon: Icon(
-                          isLiked ? Icons.favorite : Icons.favorite_border,
-                          color: isLiked ? Colors.red : Colors.white,
-                        ),
-                        onPressed: _toggleLike,
-                      ),
-                    ),
+                child: IconButton(
+                  icon: Icon(
+                    isLiked ? Icons.favorite : Icons.favorite_border,
+                    color: isLiked ? Colors.red : Colors.grey,
                   ),
+                  onPressed: _toggleLike,
                 ),
               ),
             ],

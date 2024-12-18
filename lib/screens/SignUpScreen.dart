@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'SearchPageScreen.dart'; // Импортируйте вашу страницу поиска
+import 'package:diplom/screens/HomePage.dart'; // Импортируйте вашу страницу поиска
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -11,7 +11,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _obscurePassword = true;
   bool _isPasswordValid = false;
@@ -26,15 +25,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _register() async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
-      // Успешная регистрация
+      // Получаем userId из userCredential
+      String userId = userCredential.user!.uid;
+
+      // Переход на экран поиска с userId
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SearchPage()),
+        MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -42,6 +44,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

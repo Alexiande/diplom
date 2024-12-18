@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:diplom/services/ApiService.dart'; // Импортируйте ваш ApiService
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:html/parser.dart' show parse;
 
 class RecipeScreen extends StatefulWidget {
   final int recipeId; // Идентификатор рецепта
@@ -21,9 +22,15 @@ class _RecipeScreenState extends State<RecipeScreen> {
     recipeDetails = ApiService().fetchRecipeDetails(widget.recipeId); // Получаем детали рецепта
   }
 
+  String _removeHtmlTags(String htmlString) {
+    final document = parse(htmlString);
+    return document.body?.text ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE3FFF8), // Установим фоновый цвет
       body: FutureBuilder<Map<String, dynamic>>(
         future: recipeDetails,
         builder: (context, snapshot) {
@@ -103,6 +110,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
                                   child: Text(
                                     recipe['author'],
                                     style: TextStyle(fontSize: 16),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 SizedBox(width: 8),
@@ -119,7 +127,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
                             ),
                             SizedBox(height: 16),
                             Text(
-                              recipe['description'],
+                              'Description',
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              _removeHtmlTags(recipe['description']),
                               style: TextStyle(fontSize: 16),
                             ),
                             SizedBox(height: 16),
@@ -134,7 +147,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
                               physics: NeverScrollableScrollPhysics(),
                               itemBuilder: (context, index) {
                                 return ListTile(
-                                  title: Text(recipe['ingredients'][index]),
+                                  leading: Icon(Icons.check_circle, color: Color(0xFF4169E1)),
+                                  title: Text(
+                                    recipe['ingredients'][index],
+                                    style: TextStyle(backgroundColor: Color(0xFFE3FFF8)),
+                                  ),
                                 );
                               },
                             ),
@@ -173,4 +190,5 @@ class _RecipeScreenState extends State<RecipeScreen> {
     );
   }
 }
+
 

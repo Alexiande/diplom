@@ -1,5 +1,5 @@
-import 'package:diplom/FirebaseAuth.dart';
-import 'package:diplom/screens/SearchPageScreen.dart';
+import 'package:diplom/services/FirebaseAuth.dart';
+import 'package:diplom/screens/HomePage.dart';
 import 'package:diplom/screens/SignUpScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -48,13 +48,16 @@ class _WelcomePageState extends State<WelcomePage> {
 
     _emailController.addListener(() {
       setState(() {
-        _isEmailInvalid = _containsRussianCharacters(_emailController.text) || !_isEmailValid(_emailController.text);
+        _isEmailInvalid = _containsRussianCharacters(_emailController.text) ||
+            !_isEmailValid(_emailController.text);
       });
     });
 
     _passwordController.addListener(() {
       setState(() {
-        _isPasswordInvalid = _containsRussianCharacters(_passwordController.text) || !_isPasswordValid(_passwordController.text);
+        _isPasswordInvalid =
+            _containsRussianCharacters(_passwordController.text) ||
+                !_isPasswordValid(_passwordController.text);
       });
     });
   }
@@ -78,7 +81,8 @@ class _WelcomePageState extends State<WelcomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(bottom: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(
+            bottom: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -118,14 +122,16 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: _isEmailInvalid ? Colors.red : const Color(0xFF4169E1),
+                      color: _isEmailInvalid ? Colors.red : const Color(
+                          0xFF4169E1),
                       width: 2.0,
                     ),
                     borderRadius: BorderRadius.circular(32.0),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: _isEmailInvalid ? Colors.red : const Color(0xFF9FA5C0),
+                      color: _isEmailInvalid ? Colors.red : const Color(
+                          0xFF9FA5C0),
                       width: 1.0,
                     ),
                     borderRadius: BorderRadius.circular(32.0),
@@ -161,14 +167,16 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: _isPasswordInvalid ? Colors.red : const Color(0xFF4169E1),
+                      color: _isPasswordInvalid ? Colors.red : const Color(
+                          0xFF4169E1),
                       width: 2.0,
                     ),
                     borderRadius: BorderRadius.circular(32.0),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: _isPasswordInvalid ? Colors.red : const Color(0xFF9FA5C0),
+                      color: _isPasswordInvalid ? Colors.red : const Color(
+                          0xFF9FA5C0),
                       width: 1.0,
                     ),
                     borderRadius: BorderRadius.circular(32.0),
@@ -184,7 +192,8 @@ class _WelcomePageState extends State<WelcomePage> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      _obscurePassword ? Icons.visibility_outlined : Icons
+                          .visibility_off_outlined,
                       color: const Color(0xFF9FA5C0),
                     ),
                     onPressed: () {
@@ -225,7 +234,8 @@ class _WelcomePageState extends State<WelcomePage> {
                     onPressed: () {
                       if (_isEmailInvalid || _isPasswordInvalid) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please correct the errors above')),
+                          const SnackBar(content: Text(
+                              'Please correct the errors above')),
                         );
                       } else {
                         _login(); // Вызываем метод входа
@@ -309,10 +319,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 GestureDetector(
                   onTap: () {
-
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SignUpScreen()), // Переход на экран регистрации
+                      MaterialPageRoute(builder: (context) =>
+                          SignUpScreen()), // Переход на экран регистрации
                     );
                   },
                   child: const Text(
@@ -335,15 +345,20 @@ class _WelcomePageState extends State<WelcomePage> {
 
   void _login() async {
     User? user = await _authService.signInWithEmailAndPassword(
-        _emailController.text, _passwordController.text);
+      _emailController.text,
+      _passwordController.text,
+    );
     if (user != null) {
-      // Успешный вход
+      // Успешный вход, передаем userId на следующий экран
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => SearchPage()));
+        context,
+        MaterialPageRoute(builder: (context) => HomePage(userId: user.uid)),
+      );
     } else {
       // Ошибка
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login failed')));
+        const SnackBar(content: Text('Login failed')),
+      );
     }
   }
 }

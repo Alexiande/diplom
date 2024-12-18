@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:diplom/screens/UploadStepTwoScreen.dart';
+
 class UploadStepScreen extends StatefulWidget {
   @override
   _UploadStepScreenState createState() => _UploadStepScreenState();
@@ -35,7 +37,6 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,6 +44,19 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
         title: Text('Upload'),
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text(
+            'Cancel',
+            style: TextStyle(
+              color: Color(0xFF5E6ED8),
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -103,6 +117,9 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Enter food name',
+                  hintStyle: const TextStyle(
+                    color: Color(0xFF9FA5C0), // Цвет подсказки
+                  ),
                   filled: true,
                   fillColor: Colors.white,
                   border: InputBorder.none,
@@ -127,6 +144,9 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
               child: const TextField(
                 decoration: InputDecoration(
                   hintText: 'Tell a little about your food',
+                  hintStyle: TextStyle(
+                    color: Color(0xFF9FA5C0), // Цвет подсказки
+                  ),
                   filled: true,
                   fillColor: Colors.white,
                   border: InputBorder.none,
@@ -194,7 +214,10 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Действие для следующего шага
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UploadStepTwoScreen()),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF5E6ED8),
