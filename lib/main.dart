@@ -33,10 +33,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Easy Eat',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(scaffoldBackgroundColor: const Color(0x00eff1f3)),
       home: const WelcomeScreen(),
-      debugShowCheckedModeBanner: false,
+
     );
   }
 }

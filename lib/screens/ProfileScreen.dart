@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/FirestoreService.dart';
+import 'package:diplom/services/CloudService.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userEmail;
@@ -12,58 +11,30 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final FirestoreService _firestoreService = FirestoreService();
+  final CloudService _cloudService = CloudService();
   TextEditingController bioController = TextEditingController();
   TextEditingController nameController = TextEditingController();
-  Map<String, dynamic>? userData;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    nameController.text = "user_${widget.userEmail.hashCode}";
+    bioController.text = "Who’s great?";
   }
 
-  Future<void> _loadUserData() async {
-    print('Loading user data...');
-    final userSnapshot = await _firestoreService.getUserByEmail(widget.userEmail);
-    if (userSnapshot != null && userSnapshot.exists) {
-      print('User data found!');
-      setState(() {
-        userData = userSnapshot.data() as Map<String, dynamic>;
-        nameController.text = userData?['name'] ?? 'user_${widget.userEmail.hashCode}';
-        bioController.text = userData?['bio'] ?? 'Who’s great?';
-      });
-    } else {
-      print('No user data found, creating defaults...');
-      setState(() {
-        userData = {};  // Пустая карта, чтобы обновить UI
-        nameController.text = 'user_${widget.userEmail.hashCode}';
-        bioController.text = 'Who’s great?';
-      });
-    }
-  }
-
-
-
-  Future<void> _saveBio() async {
-    if (userData != null) {
-      // Обновляем профиль, если данные уже есть в Firestore
-      await _firestoreService.updateUserProfile(
-        userData!['userId'], // Убедитесь, что userId есть в данных
-        {'bio': bioController.text, 'name': nameController.text},
+  Future<void> _saveProfile() async {
+    try {
+      await _cloudService.sendUserProfile(
+        widget.userEmail,
+        nameController.text,
+        bioController.text,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Profile updated successfully!")),
       );
-    } else {
-      // Создаем новый документ, если данных нет
-      await _firestoreService.createUserProfile({
-        'userEmail': widget.userEmail,
-        'name': nameController.text,
-        'bio': bioController.text,
-      });
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Profile created successfully!")),
+        SnackBar(content: Text("Failed to update profile: $e")),
       );
     }
   }
@@ -72,9 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("My Profile")),
-      body: userData == null
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
+      body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,8 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _saveBio,
-              child: Text(userData == null ? "Create Profile" : "Save Profile"),
+              onPressed: _saveProfile,
+              child: Text("Save Profile"),
             ),
           ],
         ),
@@ -98,3 +67,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+

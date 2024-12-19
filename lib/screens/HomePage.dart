@@ -6,6 +6,8 @@ import 'package:diplom/services/LikeService.dart';
 import 'dart:ui';
 import 'package:diplom/screens/UploadStepScreen.dart';
 import 'package:diplom/screens/ProfileScreen.dart';
+import 'package:diplom/screens/SearchScreen.dart';
+import 'package:diplom/widgets/RecipeCard.dart';
 
 class HomePage extends StatefulWidget {
   final String userId;
@@ -43,26 +45,23 @@ class _HomePageState extends State<HomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ProfileScreen(userEmail: 'userEmail')),
-
         );
       }
     });
   }
 
   Future<List<dynamic>> _filterItems() async {
-    // Подготовим список тегов для фильтрации
     List<String> tags = [];
     if (selectedCategory != 'All') {
-      tags.add(selectedCategory.toLowerCase()); // Преобразуем в нижний регистр
+      tags.add(selectedCategory.toLowerCase());
     }
-    tags.add('diet'); // Добавляем общий тег "diet"
+    tags.add('diet'); // Общий тег "diet"
 
-    // Преобразуем список тегов в строку с разделителем запятой
     String tagString = tags.join(',');
 
     return await apiService.fetchItemsByCategoryAndTag(
       category: selectedCategory == 'All' ? null : selectedCategory,
-      tag: tagString, // Передаем строку тегов
+      tag: tagString,
     );
   }
 
@@ -78,37 +77,43 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(100.0), // Увеличиваем высоту AppBar
+        preferredSize: const Size.fromHeight(100.0),
         child: Container(
-          padding: const EdgeInsets.only(top: 40), // Добавляем отступ сверху
+          padding: const EdgeInsets.only(top: 40),
           child: AppBar(
-            backgroundColor: Colors.white, // Делаем AppBar белым
+            backgroundColor: Colors.white,
             elevation: 0,
-            title: Container(
-              height: 52,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.search, color: Colors.grey),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        hintStyle: TextStyle(
+            title: GestureDetector(
+              onTap: () {
+                // При нажатии на строку поиска открываем экран поиска
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SearchScreen()),
+                );
+              },
+              child: Container(
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(32.0),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.search, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Search',
+                        style: TextStyle(
                           color: Color(0xFF2E3E5C),
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
-                        border: InputBorder.none,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             automaticallyImplyLeading: false, // Убираем стрелку назад
@@ -118,8 +123,6 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           const SizedBox(height: 16), // Отступ сверху для разделения AppBar и контента
-
-          // Заголовок "Category"
           const Padding(
             padding: EdgeInsets.only(left: 15.0), // Отступ влево для заголовка
             child: Align(
@@ -134,14 +137,11 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-
-          const SizedBox(height: 8), // Небольшой отступ между заголовком и кнопками
-
-          // Кнопки категорий
+          const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.only(left: 15.0), // Отступ влево для кнопок
+            padding: const EdgeInsets.only(left: 15.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start, // Выравнивание кнопок влево
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -214,10 +214,10 @@ class _HomePageState extends State<HomePage> {
                 } else {
                   return GridView.builder(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Две колонки
-                      crossAxisSpacing: 8.0, // Расстояние между колонками
-                      mainAxisSpacing: 8.0, // Расстояние между строками
-                      childAspectRatio: 0.7, // Соотношение сторон для карточек
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                      childAspectRatio: 0.7,
                     ),
                     padding: const EdgeInsets.all(16.0),
                     itemCount: snapshot.data!.length,
@@ -227,8 +227,8 @@ class _HomePageState extends State<HomePage> {
                       return RecipeCard(
                         title: item['title'],
                         imageUrl: item['image'],
-                        time: '${item['readyInMinutes']} min', // Время можно получить из данных, если доступно
-                        category: selectedCategory, // Передаем категорию
+                        time: '${item['readyInMinutes']} min',
+                        category: selectedCategory,
                         itemId: item['id'].toString(),
                         likeService: likeService,
                       );
@@ -263,157 +263,13 @@ class _HomePageState extends State<HomePage> {
             label: 'Profile',
           ),
         ],
-        currentIndex: _selectedIndex, // Текущий выбранный элемент
-        selectedItemColor: Colors.blue, // Цвет для выбранного элемента
-        unselectedItemColor: Colors.grey, // Цвет для невыбранных элементов
-        onTap: _onItemTapped, // Обработчик изменения индекса
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
       ),
     );
   }
 }
 
 
-
-
-class RecipeCard extends StatefulWidget {
-  final String title;
-  final String imageUrl;
-  final String time;
-  final String category; // Добавляем категорию
-  final String itemId; // Уникальный идентификатор для рецепта
-  final LikeService likeService;
-
-  const RecipeCard({
-    Key? key,
-    required this.title,
-    required this.imageUrl,
-    required this.time,
-    required this.category, // Инициализация категории
-    required this.itemId,
-    required this.likeService,
-  }) : super(key: key);
-
-  @override
-  _RecipeCardState createState() => _RecipeCardState();
-}
-
-class _RecipeCardState extends State<RecipeCard> {
-  bool isLiked = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLikeStatus();
-  }
-
-  Future<void> _loadLikeStatus() async {
-    final likedItems = await widget.likeService.getLikedItems();
-    setState(() {
-      isLiked = likedItems.contains(widget.itemId);
-    });
-  }
-
-  Future<void> _toggleLike() async {
-    setState(() {
-      isLiked = !isLiked;
-    });
-    if (isLiked) {
-      await widget.likeService.addLikedItem(widget.itemId);
-    } else {
-      await widget.likeService.removeLikedItem(widget.itemId);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0), // Отступ вокруг карточки
-      child: GestureDetector( // Используем GestureDetector для обработки нажатий
-        onTap: () {
-          // Здесь вы можете определить логику перехода на новый экран
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => RecipeScreen(recipeId: int.parse(widget.itemId)),), // Преобразуем itemId в int
-          );
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 5,
-                blurRadius: 7,
-                offset: const Offset(0, 3), // Смещение тени
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16), // Скругляем все углы
-                    child: CachedNetworkImage(
-                      imageUrl: widget.imageUrl,
-                      fit: BoxFit.cover,
-                      height: 120, // Высота изображения
-                      width: double.infinity,
-                      placeholder: (context, url) => Container(
-                        height: 120,
-                        width: double.infinity,
-                        child: const Center(
-                          child: CircularProgressIndicator(), // Индикатор загрузки
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: const TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2E3E5C),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.time,
-                          style: const TextStyle(
-                            fontSize: 14.0,
-                            color: Color(0xFF9FA5C0),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton(
-                  icon: Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? Colors.red : Colors.grey,
-                  ),
-                  onPressed: _toggleLike,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

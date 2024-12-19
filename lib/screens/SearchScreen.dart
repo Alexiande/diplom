@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:diplom/services/ApiService.dart';
 import 'package:diplom/screens/RecipeScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:diplom/services/LikeService.dart'; // Assuming you have a LikeService for managing likes
+import 'package:diplom/widgets/RecipeCard.dart'; // Assuming you have the RecipeCard widget
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -15,13 +18,30 @@ class _SearchScreenState extends State<SearchScreen> {
   late Future<List<dynamic>> searchResults;
   bool isSearchingByIngredients = false;
 
-  // История поиска (для примера, можно заменить на реальное хранение)
-  List<String> searchHistory = ['Pancakes', 'Salad', 'Sushi'];
+  // История поиска
+  List<String> searchHistory = [];
+  bool isSearching = false;
+  bool isFilterActive = false;  // Флаг для отображения фильтров
 
   @override
   void initState() {
     super.initState();
     searchResults = Future.value([]);
+    _loadSearchHistory();
+  }
+
+  // Загрузка истории поиска из SharedPreferences
+  void _loadSearchHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      searchHistory = prefs.getStringList('searchHistory') ?? [];
+    });
+  }
+
+  // Сохранение истории поиска в SharedPreferences
+  void _saveSearchHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('searchHistory', searchHistory);
   }
 
   // Метод для поиска
@@ -30,8 +50,13 @@ class _SearchScreenState extends State<SearchScreen> {
     if (query.isEmpty) {
       setState(() {
         searchResults = Future.value([]);
+        isSearching = false;
       });
     } else {
+      setState(() {
+        isSearching = true;
+      });
+
       if (isSearchingByIngredients) {
         // Поиск по ингредиентам
         setState(() {
@@ -43,26 +68,95 @@ class _SearchScreenState extends State<SearchScreen> {
           searchResults = apiService.fetchRecipesByName(query);
         });
       }
+
+      // Добавляем запрос в историю поиска
+      if (!searchHistory.contains(query)) {
+        setState(() {
+          searchHistory.add(query);
+        });
+        _saveSearchHistory();
+      }
     }
   }
 
-  Color _getButtonColor(String category) {
-    return category == 'All' ? const Color(0xFF4169E1) : const Color(0xFFF4F5F7);
+  // Виджет для отображения истории поиска
+  Widget _buildSearchHistory() {
+    return ListView.builder(
+      itemCount: searchHistory.length,
+      itemBuilder: (context, index) {
+        final suggestion = searchHistory[index];
+        return GestureDetector(
+          onTap: () {
+            searchController.text = suggestion;
+            _search();
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            child: Text(
+              suggestion,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF2E3E5C)),
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  Color _getButtonTextColor(String category) {
-    return category == 'All' ? Colors.white : const Color(0xFF9FA5C0);
+  // Виджет для фильтров
+  Widget _buildFilterOptions() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            title: const Text('By Food'),
+            leading: const Icon(Icons.restaurant_menu),
+            onTap: () {
+              setState(() {
+                isSearchingByIngredients = false;
+              });
+              _search();
+            },
+          ),
+          ListTile(
+            title: const Text('By Ingredients'),
+            leading: const Icon(Icons.food_bank),
+            onTap: () {
+              setState(() {
+                isSearchingByIngredients = true;
+              });
+              _search();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120.0), // Увеличиваем высоту AppBar
+        preferredSize: const Size.fromHeight(120.0),
         child: Container(
-          padding: const EdgeInsets.only(top: 40), // Добавляем отступ сверху
+          padding: const EdgeInsets.only(top: 40),
           child: AppBar(
-            backgroundColor: Colors.white, // Делаем AppBar белым
+            backgroundColor: Colors.white,
             elevation: 0,
             title: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -71,7 +165,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Color(0xFF2E3E5C)),
                     onPressed: () {
-                      Navigator.pop(context); // Возвращаемся на предыдущий экран
+                      Navigator.pop(context);
                     },
                   ),
                   Expanded(
@@ -101,162 +195,84 @@ class _SearchScreenState extends State<SearchScreen> {
                               onSubmitted: (_) => _search(),
                             ),
                           ),
+                          // Кнопка для очищения поля поиска
+                          IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              searchController.clear();
+                              _search();
+                            },
+                          ),
                         ],
                       ),
                     ),
                   ),
+                  // Значок фильтра рядом с крестиком
                   IconButton(
-                    icon: const Icon(Icons.clear),
+                    icon: const Icon(Icons.filter_list, color: Color(0xFF2E3E5C)),
                     onPressed: () {
-                      searchController.clear();
-                      _search(); // Очищаем результаты поиска
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_horiz),
-                    onPressed: () {
-                      // Дополнительные действия
+                      setState(() {
+                        isFilterActive = !isFilterActive;  // Переключаем отображение фильтров
+                      });
                     },
                   ),
                 ],
               ),
             ),
-            automaticallyImplyLeading: false, // Убираем стрелку назад по умолчанию
+            automaticallyImplyLeading: false,
           ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0), // Отступы по бокам
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
-            const SizedBox(height: 16), // Отступ сверху для разделения AppBar и контента
-
-            // История поиска
-            const Padding(
-              padding: EdgeInsets.only(left: 16.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Search History',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _buildHistoryItem('Pancakes'),
-                _buildHistoryItem('Salad'),
-                _buildHistoryItem('Sushi'),
-              ],
-            ),
-
-            // Предложения для поиска
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Search Suggestions',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+
+            // Когда фильтры активированы, показываем карточки фильтра
+            if (isFilterActive) ...[
+              _buildFilterOptions(),
+              const SizedBox(height: 16),
+            ],
+
+            // Отображение истории поиска
+            if (searchHistory.isNotEmpty && !isSearching) ...[
+              _buildSearchHistory(),
+            ],
+
+            // Когда ищем - показываем только результаты поиска
+            if (isSearching) ...[
+              Expanded(
+                child: FutureBuilder<List<dynamic>>(
+                  future: searchResults,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return const Center(child: Text('Failed to load recipes'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No results found'));
+                    } else {
+                      return ListView.builder(
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (context, index) {
+                          final item = snapshot.data![index];
+                          return RecipeCard(
+                            title: item['title'],
+                            imageUrl: item['image'],
+                            time: '${item['readyInMinutes']} min',
+                            category: item['category'] ?? 'Unknown',
+                            itemId: item['id'].toString(),
+                            likeService: LikeService(),
+                          );
+                        },
+                      );
+                    }
+                  },
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  _buildSuggestionButton('Sushi'),
-                  _buildSuggestionButton('Sandwich'),
-                  _buildSuggestionButton('Seafood'),
-                  _buildSuggestionButton('Fried Rice'),
-                ],
-              ),
-            ),
-
-            // Результаты поиска
-            Expanded(
-              child: FutureBuilder<List<dynamic>>(
-                future: searchResults,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Failed to load recipes'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No results found'));
-                  } else {
-                    return ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (context, index) {
-                        final item = snapshot.data![index];
-                        return ListTile(
-                          title: Text(item['title']),
-                          subtitle: Text('Ready in ${item['readyInMinutes']} min'),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RecipeScreen(recipeId: item['id']),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  }
-                },
-              ),
-            ),
+            ],
           ],
-        ),
-      ),
-    );
-  }
-
-  // Виджет для элемента истории поиска
-  Widget _buildHistoryItem(String text) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          children: [
-            Text(text),
-            const Icon(Icons.arrow_forward),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Виджет для кнопки предложения для поиска
-  Widget _buildSuggestionButton(String text) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[200],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(32.0),
-            ),
-          ),
-          onPressed: () {
-            searchController.text = text;
-            _search();
-          },
-          child: Text(
-            text,
-            style: const TextStyle(color: Color(0xFF2E3E5C)),
-          ),
         ),
       ),
     );
