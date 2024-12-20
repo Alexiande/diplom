@@ -12,7 +12,7 @@
     * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
 
     This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
+    the `--base-href` argument provided to `flutter build` on Flutter builds.
   -->
   <base href="/">
 
@@ -31,8 +31,29 @@
 
   <title>diplom</title>
   <link rel="manifest" href="manifest.json">
+
+
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAUd-rnHBHTXl33GpkPbNEKoo4ALXH6CNA",
+      authDomain: "maineasyeat.firebaseapp.com",
+      projectId: "maineasyeat",
+      storageBucket: "maineasyeat.appspot.com",
+      messagingSenderId: "661221266888",
+      appId: "1:661221266888:web:b813d235f1e8e7b478f7e7",
+    };
+
+  </script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore.js"></script>
+
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+<script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

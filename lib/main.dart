@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/WelcomeScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart'; // Для kIsWeb
 
 Future<void> main() async {
   // Set the status bar style globally
@@ -10,8 +11,26 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.light, // Set icons to light
     statusBarBrightness: Brightness.light, // Set status bar background to light
   ));
+
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Инициализация Firebase без параметров для мобильных устройств
+
+  // Initialize Firebase
+  if (kIsWeb) {
+    // Для веб-приложения инициализируем Firebase с параметрами
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyAUd-rnHBHTXl33GpkPbNEKoo4ALXH6CNA",
+        appId: "1:661221266888:web:b813d235f1e8e7b478f7e7",
+        messagingSenderId: "661221266888",
+        projectId: "maineasyeat",
+        authDomain: "maineasyeat.firebaseapp.com",
+        storageBucket: "maineasyeat.appspot.com",
+      ),
+    );
+  } else {
+    // Для мобильных платформ (Android/iOS) инициализация Firebase
+    await Firebase.initializeApp(); // Initialize Firebase for mobile (Android/iOS)
+  }
 
   runApp(const MyApp());
 }
