@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                   RotationTransition(
                     turns: _animation,
                     child: SizedBox(
-                      child: Image.asset('asset/image_1.png', fit: BoxFit.cover), // замените на свой актив
+                      child: Image.asset('assets/images/image_1.png', fit: BoxFit.cover), // замените на свой актив
                     ),
                   ),
                   // Вращающиеся картинки
@@ -97,25 +97,25 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     left: 15.0,
                     top: 10,
                     child: SizedBox(
-                      child: Image.asset('asset/image_5.png', fit: BoxFit.cover), // замените на свой актив
+                      child: Image.asset('assets/images/image_5.png', fit: BoxFit.cover), // замените на свой актив
                     ),
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: SizedBox(
-                      child: Image.asset('asset/image_5.png', fit: BoxFit.cover), // замените на свой актив
+                      child: Image.asset('assets/images/image_5.png', fit: BoxFit.cover), // замените на свой актив
                     ),
                   ),
                   Align(
                     alignment: Alignment.bottomLeft,
                     child: SizedBox(
-                      child: Image.asset('asset/image_4.png', fit: BoxFit.cover), // замените на свой актив
+                      child: Image.asset('assets/images/image_4.png', fit: BoxFit.cover), // замените на свой актив
                     ),
                   ),
                   Align(
                     alignment: Alignment.topRight,
                     child: SizedBox(
-                      child: Image.asset('asset/image_3.png', fit: BoxFit.cover), // замените на свой актив
+                      child: Image.asset('assets/images/image_3.png', fit: BoxFit.cover), // замените на свой актив
                     ),
                   ),
                 ],

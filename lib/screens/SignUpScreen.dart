@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:diplom/screens/HomePage.dart'; // Импортируйте вашу страницу поиска
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:diplom/screens/HomePage.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -10,7 +11,8 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _isPasswordValid = false;
@@ -30,10 +32,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: _passwordController.text,
       );
 
-      // Получаем userId из userCredential
       String userId = userCredential.user!.uid;
 
-      // Переход на экран поиска с userId
+      // Сохраняем данные в Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'email': _emailController.text,
+        'name': _nameController.text,
+        'bio': _bioController.text,
+      });
+
+      // Переход на экран HomePage с userId
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage(userId: userId)),
@@ -44,7 +52,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             const SizedBox(height: 25),
+            // Поле ввода для почты
             SizedBox(
               width: double.infinity,
               child: TextField(
@@ -92,6 +100,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             const SizedBox(height: 25),
+            // Поле ввода для имени
+            SizedBox(
+              width: double.infinity,
+              child: TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.person, color: Color(0xFF9FA5C0)),
+                  labelText: 'Name',
+                  labelStyle: const TextStyle(color: Color(0xFF9FA5C0)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(32.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
+            // Поле ввода для биографии
+            SizedBox(
+              width: double.infinity,
+              child: TextField(
+                controller: _bioController,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.text_fields, color: Color(0xFF9FA5C0)),
+                  labelText: 'Bio',
+                  labelStyle: const TextStyle(color: Color(0xFF9FA5C0)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(32.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
+            // Поле ввода для пароля
             SizedBox(
               width: double.infinity,
               child: TextField(
@@ -121,6 +164,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             const SizedBox(height: 15),
+            // Проверка пароля
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -147,6 +191,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ],
             ),
             const SizedBox(height: 25),
+            // Кнопка регистрации
             ElevatedButton(
               onPressed: _isPasswordValid && _containsNumber ? _register : null,
               style: ElevatedButton.styleFrom(

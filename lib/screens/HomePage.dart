@@ -1,9 +1,6 @@
-import 'package:diplom/screens/RecipeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:diplom/services/ApiService.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:diplom/services/LikeService.dart';
-import 'dart:ui';
 import 'package:diplom/screens/UploadStepScreen.dart';
 import 'package:diplom/screens/ProfileScreen.dart';
 import 'package:diplom/screens/SearchScreen.dart';
@@ -44,7 +41,7 @@ class _HomePageState extends State<HomePage> {
       if (index == 4){
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProfileScreen(userEmail: 'userEmail')),
+          MaterialPageRoute(builder: (context) => ProfileScreen(userId: widget.userId)),
         );
       }
     });

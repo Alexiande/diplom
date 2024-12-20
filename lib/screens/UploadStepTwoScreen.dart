@@ -1,7 +1,20 @@
+import 'package:diplom/screens/HomePage.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UploadStepTwoScreen extends StatefulWidget {
-  const UploadStepTwoScreen({super.key});
+  final String name;
+  final String description;
+  final String time;
+  final String imagePath;
+
+  const UploadStepTwoScreen({
+    required this.name,
+    required this.description,
+    required this.time,
+    required this.imagePath,
+  });
 
   @override
   _UploadStepTwoScreenState createState() => _UploadStepTwoScreenState();
@@ -15,6 +28,95 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
     setState(() {
       ingredients.add('');
     });
+  }
+
+  // Проверка, что все поля заполнены
+  bool _areFieldsValid() {
+    if (_stepController.text.isEmpty) return false;
+    for (var ingredient in ingredients) {
+      if (ingredient.isEmpty) return false;
+    }
+    return true;
+  }
+
+  // Функция для отправки данных в Firebase
+  // Функция для отправки данных в Firebase
+  Future<void> _submitData() async {
+    if (_areFieldsValid()) {
+      CollectionReference recipes = FirebaseFirestore.instance.collection('recipes');
+
+      try {
+        // Получаем текущего аутентифицированного пользователя
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          // Если пользователь не аутентифицирован, выводим ошибку
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('You must be logged in to submit a recipe!')),
+          );
+          return;
+        }
+
+        // Добавляем рецепт в коллекцию
+        await recipes.add({
+          'name': widget.name,
+          'description': widget.description,
+          'time': widget.time,
+          'imagePath': widget.imagePath,
+          'ingredients': ingredients,
+          'step': _stepController.text,
+          'timestamp': FieldValue.serverTimestamp(),
+          'userId': user.uid, // Связываем рецепт с пользователем
+        });
+
+        _showSuccessDialog(); // Показываем диалог о успешной загрузке
+
+        // Переход на экран HomeScreen после успешной загрузки
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage(userId: user.uid)),
+        );
+      } catch (e) {
+        // В случае ошибки отображаем ошибку
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to upload data!')),
+        );
+      }
+    } else {
+      // Если не все поля заполнены, показываем ошибку
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+    }
+  }
+
+
+
+  // Отображение диалога об успешной загрузке
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Upload Successful'),
+          content: Row(
+            children: const [
+              Icon(Icons.check_circle, color: Colors.green),
+              SizedBox(width: 10),
+              Text('Загрузка прошла успешно!'),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Возврат на предыдущий экран
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildIngredientInput(int index) {
@@ -66,7 +168,7 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
           child: const Text(
             'Cancel',
             style: TextStyle(
-              color: Color(0xFF1FCC79), // Зеленый цвет, подходящий для отмены
+              color: Color(0xFF1FCC79),
               fontWeight: FontWeight.bold,
               fontSize: 15,
             ),
@@ -77,10 +179,10 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
             padding: EdgeInsets.only(right: 16.0),
             child: Center(
               child: Text(
-                '1/2',
+                '2/2',
                 style: TextStyle(
                   fontSize: 17,
-                  color: Color(0xFF3E5481), // Синий цвет для отображения шага
+                  color: Color(0xFF3E5481),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -97,7 +199,7 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
               'Ingredients',
               style: TextStyle(
                 fontSize: 17,
-                color: Color(0xFF2E3E5C), // Основной темный цвет текста
+                color: Color(0xFF2E3E5C),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -118,7 +220,7 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
                   child: Text(
                     '+ Ingredient',
                     style: TextStyle(
-                      color: Color(0xFF2E3E5C), // Темный цвет для текста
+                      color: Color(0xFF2E3E5C),
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
@@ -140,7 +242,7 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
               children: [
                 const CircleAvatar(
                   radius: 12,
-                  backgroundColor: Color(0xFF3E5481), // Цвет для круга (синий)
+                  backgroundColor: Color(0xFF3E5481),
                   child: Text(
                     '1',
                     style: TextStyle(
@@ -177,13 +279,13 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
             Container(
               height: 50,
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F5F7), // Светлый фон для фотографии
+                color: const Color(0xFFF4F5F7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Center(
                 child: Icon(
                   Icons.camera_alt_outlined,
-                  color: Color(0xFF3E5481), // Синий цвет для иконки камеры
+                  color: Color(0xFF3E5481),
                 ),
               ),
             ),
@@ -195,7 +297,7 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF4F5F7), // Цвет кнопки "Back"
+                      backgroundColor: const Color(0xFFF4F5F7),
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32.0),
@@ -204,7 +306,7 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
                     child: const Text(
                       'Back',
                       style: TextStyle(
-                        color: Color(0xFF3E5481), // Синий для текста
+                        color: Color(0xFF3E5481),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -213,9 +315,9 @@ class _UploadStepTwoScreenState extends State<UploadStepTwoScreen> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: _submitData,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1FCC79), // Зеленый для кнопки "Next"
+                      backgroundColor: const Color(0xFF1FCC79),
                       padding: const EdgeInsets.symmetric(vertical: 14.0),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32.0),

@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:diplom/screens/UploadStepTwoScreen.dart';
 
 class UploadStepScreen extends StatefulWidget {
@@ -12,29 +15,89 @@ class UploadStepScreen extends StatefulWidget {
 class _UploadStepScreenState extends State<UploadStepScreen> {
   final ImagePicker _picker = ImagePicker();
   double _sliderValue = 30;
+  final TextEditingController _foodNameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  XFile? _image; // Для хранения выбранного изображения
 
+  // Функция для запроса разрешений и выбора изображения
   Future<void> _requestGalleryPermission(BuildContext context) async {
-    var status = await Permission.storage.status;
+    PermissionStatus status = await Permission.photos.status;
 
     if (status.isGranted) {
-      final XFile? photo = await _picker.pickImage(source: ImageSource.gallery);
-      if (photo != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Фото выбрано: ${photo.path}')),
-        );
-      }
+      // Разрешение уже предоставлено, можно открыть галерею
+      _openGallery();
     } else if (status.isDenied) {
-      status = await Permission.storage.request();
-      if (status.isGranted) {
-        _requestGalleryPermission(context);
+      // Разрешение не предоставлено, запросим его
+      PermissionStatus newStatus = await Permission.photos.request();
+      if (newStatus.isGranted) {
+        // Если разрешение предоставлено, откроем галерею
+        _openGallery();
       } else {
+        // Если разрешение отклонено, выводим сообщение
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Доступ к галерее запрещен')),
         );
       }
     } else if (status.isPermanentlyDenied) {
+      // Если разрешение навсегда отклонено, предложим открыть настройки
       openAppSettings();
     }
+  }
+
+  Future<void> _openGallery() async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.gallery);
+    if (photo != null) {
+      setState(() {
+        _image = photo;
+      });
+    }
+  }
+
+  Future<void> _saveToFirestore() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Пожалуйста, войдите в свой аккаунт')),
+      );
+      return;
+    }
+
+    // Путь к изображению по умолчанию
+    String defaultImagePath = 'assets/images/default_image.png';
+
+    // Если изображение не выбрано, используем изображение по умолчанию
+    String imagePathToSave = _image != null ? _image!.path : defaultImagePath;
+
+    CollectionReference recipes = FirebaseFirestore.instance.collection('recipes');
+
+    await recipes.add({
+      'userId': user.uid,
+      'foodName': _foodNameController.text,
+      'description': _descriptionController.text,
+      'cookingDuration': _sliderValue.round(),
+      'timestamp': FieldValue.serverTimestamp(),
+      'imagePath': imagePathToSave, // Сохраняем путь к изображению
+    }).then((value) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Рецепт успешно сохранен')),
+      );
+      // Переход на следующий экран
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UploadStepTwoScreen(
+            name: _foodNameController.text,
+            description: _descriptionController.text,
+            time: _sliderValue.round().toString(),
+            imagePath: _image?.path ?? defaultImagePath, // Путь к изображению
+          ),
+        ),
+      );
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка при сохранении рецепта: $error')),
+      );
+    });
   }
 
   @override
@@ -72,29 +135,15 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
                   border: Border.all(color: Colors.grey.shade300, width: 1),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                child: const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.photo_rounded, size: 50, color: Colors.grey),
-                      SizedBox(height: 8),
-                      Text(
-                        'Add Cover Photo',
-                        style: TextStyle(
-                          fontSize: 17.0,
-                          color: Color(0xFF2E3E5C),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        '(up to 12 Mb)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black45,
-                        ),
-                      ),
-                    ],
+                child: Center(
+                  child: _image == null
+                      ? Image.asset(
+                    'assets/images/default_image.png', // Правильный путь
+                    fit: BoxFit.cover,
+                  )
+                      : Image.file(
+                    File(_image!.path),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
@@ -115,10 +164,11 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
                 borderRadius: BorderRadius.circular(32.0),
               ),
               child: TextField(
+                controller: _foodNameController,
                 decoration: InputDecoration(
                   hintText: 'Enter food name',
                   hintStyle: const TextStyle(
-                    color: Color(0xFF9FA5C0), // Цвет подсказки
+                    color: Color(0xFF9FA5C0),
                   ),
                   filled: true,
                   fillColor: Colors.white,
@@ -141,11 +191,12 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
                 border: Border.all(color: const Color(0xFFD0DBEA), width: 1),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: const TextField(
-                decoration: InputDecoration(
+              child: TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
                   hintText: 'Tell a little about your food',
                   hintStyle: TextStyle(
-                    color: Color(0xFF9FA5C0), // Цвет подсказки
+                    color: Color(0xFF9FA5C0),
                   ),
                   filled: true,
                   fillColor: Colors.white,
@@ -214,23 +265,37 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UploadStepTwoScreen()),
-                  );
+                  _saveToFirestore(); // Сохраняем данные в Firestore
+                  if (_image != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UploadStepTwoScreen(
+                          name: _foodNameController.text,
+                          description: _descriptionController.text,
+                          time: _sliderValue.round().toString(), // Преобразуем в строку
+                          imagePath: _image!.path, // Путь к изображению
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Пожалуйста, выберите изображение')),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF5E6ED8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(32.0),
                   ),
-                  minimumSize: const Size(double.infinity, 70),
+                  minimumSize: const Size(200, 50),
                 ),
                 child: const Text(
-                  'Next',
+                  'Next Step',
                   style: TextStyle(
-                    color: Colors.white,
                     fontSize: 16.0,
+                    color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -239,7 +304,6 @@ class _UploadStepScreenState extends State<UploadStepScreen> {
           ],
         ),
       ),
-      resizeToAvoidBottomInset: true,
     );
   }
 }
